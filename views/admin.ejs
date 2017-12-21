@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+	<!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/moment/moment.js"></script>
+    
+</head>
+<body>
+	<div class="wraper clearfix">
+		<header>百度新闻后台管理系统</header>
+		<nav>
+			<ul>
+				<li><a href="http://localhost:3000/admin/">添加新闻</a></li>
+				<li><a href="http://localhost:3000/admin/newslist">新闻列表</a></li>
+			</ul>
+		</nav>
+		<div class="right-box">
+			<div class="con-box">
+				<form class="form-horizontal">
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">新闻标题</label>
+					    <div class="col-sm-10">
+					      <input type="text" class="form-control" id="title" placeholder="新闻标题">
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">所属类别</label>
+					    <div class="col-sm-10">
+					      <select class="select-box" id="category">
+						  		<option>推荐</option>
+						  		<option>百家</option>
+						  		<option>本地</option>
+						  		<option>娱乐</option>
+						  		<option>社会</option>
+						  		<option>军事</option>
+						  		<option>女人</option>
+						  		<option>搞笑</option>
+						  		<option>互联网</option>
+						  		<option>科技</option>	  		
+						  </select>
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">图片</label>
+					    <div class="col-sm-10">
+					      <input type="text" class="form-control" id="img" placeholder="图片">
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">新闻来源</label>
+					    <div class="col-sm-10">
+					      <input type="text" class="form-control" id="source" placeholder="新闻来源">
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">时间</label>
+					    <div class="col-sm-10">
+					      <input type="datetime-local" class="form-control" id="time">
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">类型</label>
+					    <div class="col-sm-10">
+					      <div class="dropdown">
+							  <select class="select-box" id="sign">
+							  		<option>普通</option>
+							  		<option>热点</option>
+							  		<option>轮播</option>
+							  </select>
+							</div>
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <div class="col-sm-offset-2 col-sm-10">
+					      <button type="submit" class="btn btn-primary btn-l" id="subBtn" data-toggle="modal" data-target="">提交</button>
+					    </div>
+					  </div>
+					</form>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+	  <div class="modal-dialog modal-sm" role="document">
+	    <div class="modal-content">
+	    	  <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        
+		      </div>
+	      	  <div class="modal-body">提交成功！</div>
+	      	  <div class="modal-footer">
+		        <button type="button" class="btn btn-primary" data-dismiss="modal" id="close">关闭</button>
+		      </div>
+	    </div>
+	  </div>
+	</div>
+</div>
+</body>
+<script type="text/javascript">
+	$(function(){
+		getTime();
+		$('#time').val(getTime())
+		$('#time').blur(function() {
+			console.log($(this).val())
+		});
+		$('#subBtn').click(function(e){
+			e.preventDefault();
+			var s;
+			if($('#sign option:selected').text()==='普通'){
+				s=0;
+			}else if($('#sign option:selected').text()==='热点'){
+				s=1;
+			}else if($('#sign option:selected').text()==='轮播'){
+				s=2;
+			}
+			// YYYY-MM-DD HH:mm:ss
+			var t = moment($('#time').val()).format()
+			// 2017-12-14T02:35:50.000Z
+			console.log($('#time').val())
+			var json ={
+				title:$('#title').val(),
+				category:$('#category').val(),
+				img:$('#img').val(),
+				source:$('#source').val(),
+				time:t,
+				sign:s
+			};
+			if($('#title').val()===''){
+				$('#title').parents('.form-group').addClass('has-error')
+				$('#title').focus();
+			}else{
+				$(this).attr('data-target','.bs-example-modal-sm');
+				$.ajax({
+					url:'/admin/addNews',
+					type:'post',
+					data:json,
+					success: function(data){
+						console.log(data)
+
+					},
+					error:function(err){
+						console.log(err)
+					}
+				});
+				$('#close').click(function(){
+					$('#title').val('');
+					$('#img').val('');
+					$('#source').val('');
+					$('#time').val()
+				})
+				
+
+			}
+		})
+	})
+		
+	//获取当前时间
+	function getTime(){
+		function p(s) {
+		    return s < 10 ? '0' + s: s;
+		}
+		var myDate = new Date();
+		//获取当前年
+		var year=myDate.getFullYear();
+		//获取当前月
+		var month=myDate.getMonth()+1;
+		//获取当前日
+		var date=myDate.getDate(); 
+		var h=myDate.getHours();       //获取当前小时数(0-23)
+		var m=myDate.getMinutes();     //获取当前分钟数(0-59)
+		var s=myDate.getSeconds();  
+		var nowStr=year+'-'+p(month)+"-"+p(date)+"T"+p(h)+':'+p(m)+":"+p(s);
+		return nowStr;
+		// yyyy-MM-ddThh:mm
+	}
+</script>
+</html>

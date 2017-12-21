@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+	<!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/moment/moment.js"></script>
+    
+</head>
+<body>
+	<div class="wraper clearfix">
+		<header>百度新闻后台管理系统</header>
+		<nav>
+			<ul>
+				<li><a href="http://localhost:3000/admin/">添加新闻</a></li>
+				<li><a href="http://localhost:3000/admin/newslist">新闻列表</a></li>
+			</ul>
+		</nav>
+		<div class="right-box">
+			<div class="con-box">
+				<form class="form-horizontal" method="post" action="/admin/update">
+					 <input type="hidden" class="form-control" name='id' id="id">
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">新闻标题</label>
+					    <div class="col-sm-10">
+					      <input type="text" class="form-control" name='title' id="title" placeholder="新闻标题">
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">所属类别</label>
+					    <div class="col-sm-10">
+					      <select class="select-box" id="category" name="category">
+						  		<option>推荐</option>
+						  		<option>百家</option>
+						  		<option>本地</option>
+						  		<option>娱乐</option>
+						  		<option>社会</option>
+						  		<option>军事</option>
+						  		<option>女人</option>
+						  		<option>搞笑</option>
+						  		<option>互联网</option>
+						  		<option>科技</option>	  		
+						  </select>
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">图片</label>
+					    <div class="col-sm-10">
+					      <input type="text" class="form-control" id="img" name="img" placeholder="图片">
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">新闻来源</label>
+					    <div class="col-sm-10">
+					      <input type="text" class="form-control" id="source" name='source' placeholder="新闻来源">
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">时间</label>
+					    <div class="col-sm-10">
+					      <input type="datetime-local" class="form-control" id="time" name='time'>
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <label for="" class="col-sm-2 control-label">类型</label>
+					    <div class="col-sm-10">
+					      <div class="dropdown">
+							  <select class="select-box" id="sign" name='sign'>
+							  		<option>普通</option>
+							  		<option>热点</option>
+							  		<option>轮播</option>
+							  </select>
+							</div>
+					    </div>
+					  </div>
+					  <div class="form-group bMar30">
+					    <div class="col-sm-offset-2 col-sm-10">
+					      <button type="submit" class="btn btn-primary btn-l" id="subBtn">提交</button>
+					    </div>
+					  </div>
+					</form>
+			</div>
+		</div>
+	</div>
+	
+</div>
+</body>
+<script type="text/javascript">
+	$(function(){
+		//获取地址中的id
+		// $('#sign').change(function(){
+		// 	console.log($(this).val())
+		// })
+		function GetQueryString(name){
+		     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+		     var r = window.location.search.substr(1).match(reg);
+		     if(r!=null)return  unescape(r[2]); return null;
+		}
+		var id = GetQueryString("id");
+		$('#id').val(id);
+		$.ajax({
+			url:`/admin/edit?id=${id}`,
+			type:'get',
+			success:function(data){
+				var s;
+				if((data[0].sign)===0){
+					s='普通'
+				}else if((data[0].sign)===1){
+					s='热点'
+				}else if((data[0].sign)===2){
+					s='轮播'
+				}
+				var time = moment(`${data[0].time}`).format('YYYY-MM-DDTHH:mm:ss');
+				$('#title').val(data[0].title);
+				$('#category').val(data[0].category);
+				$('#img').val(data[0].img);
+				$('#source').val(data[0].source);
+				$('#time').val(time);
+				$('#sign').val(s);
+			},
+			error:function(err){
+				console.log(err)
+			}
+
+		})
+		$('#subBtn').click(function(){
+			// e.preventDefault();
+			 if($('#sign option:selected').text()==='普通'){
+				$('#sign option:selected').val(0)
+			}else if($('#sign option:selected').text()==='热点'){
+				$('#sign option:selected').val(1)
+			}else if($('#sign option:selected').text()==='轮播'){
+				$('#sign option:selected').val(2)
+			} 
+			
+		})
+	})
+</script>
+</html>

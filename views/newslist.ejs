@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+	<!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/moment/moment.js"></script>
+     
+</head>
+<body>
+	<div class="wraper clearfix">
+		<header>百度新闻后台管理系统</header>
+		<nav>
+			<ul>
+				<li><a href="http://localhost:3000/admin/">添加新闻</a></li>
+				<li><a href="http://localhost:3000/admin/newslist">新闻列表</a></li>
+			</ul>
+		</nav>
+		<div class="right-box">
+			
+			<div class="tab-box">
+				<div class="c-type">
+					<select class="select-box" id="category" name="category">
+				  		<option>推荐</option>
+				  		<option>百家</option>
+				  		<option>本地</option>
+				  		<option>娱乐</option>
+				  		<option>社会</option>
+				  		<option>军事</option>
+				  		<option>女人</option>
+				  		<option>搞笑</option>
+				  		<option>互联网</option>
+				  		<option>科技</option>	  		
+				    </select>
+				</div>
+				<div class="table-responsive ">
+					  <table class="table table-hover table-striped">
+					    <colgroup>
+					    	<col width="10%">
+					    	<col width="10%">
+					    	<col width="25%">
+					    	<col width="10%">
+					    	<col width="15%">
+					    	<col width="10%">
+					    	<col width="10%">
+					    	<col width="10%">
+					    </colgroup>
+					    <thead>
+					    	<tr class="warning">
+					    		<th>编号</th>
+					    		<th>所属类别</th>
+					    		<th>新闻标题</th>
+					    		<th>图片</th>
+					    		<th>新闻来源</th>
+					    		<th>时间</th>
+					    		<th>新闻类型</th>
+					    		<th>操作</th>
+					    	</tr>
+					    </thead>
+					    <tbody>
+					    	
+					    </tbody>
+					  </table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        
+	      </div>
+	      <div class="modal-body">
+	        确定删除吗？
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+	        <button type="button" class="btn btn-primary" id="subBtn">确定</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+</body>
+<script type="text/javascript">
+	$(function(){
+		function getAllNews(){
+			$.ajax({
+				url:'/admin/getAllNews',
+				type:'get',
+				success:function(data){	
+					data.forEach(function(ele, index){
+						var s = ele.sign;
+						if(s===0){
+								s='普通';
+							}else if(s===1){
+								s='热点';
+							}else if(s===2){
+								s='轮播'
+						}
+						
+						var id = ele.id;
+						var category = ele.category;
+						var title = ele.title;
+						var img = ele.img;
+						var source = ele.source;
+						// var time = ele.time;
+						var time = moment(`${ele.time}`).format('YYYY-MM-DD HH:mm:ss');
+						var sign = s;
+						$(`<tr><td id=${id}>${id}</td><td class='category'>${category}</td><td class='title'>${title}</td><td class='img'><img src=${img} width='100' /></td><td class='source'>${source}</td><td class='time'>${time}</td><td class='sign'>${sign}</td><td><span class='glyphicon glyphicon-pencil edit'></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class='glyphicon glyphicon-remove delete'  data-toggle="modal" data-target="#myModal"></span></td></tr>`).appendTo('table tbody');
+
+					})
+					
+				},
+				error:function(err){
+					console.log(err)
+				}
+			})
+		}
+		getAllNews();
+
+		$('table').on('click','.delete',function(){
+			
+			var json={
+				id:$(this).parents('tr').children('td').eq(0).attr('id')
+			};
+			$('#subBtn').click(function(){
+				$.ajax({
+					url:'/admin/deleteNews',
+					type:'post',
+					data:json,
+					success:function(data){
+						if(data.state==='ok'){
+							$('tbody tr').remove();
+							getAllNews();
+						}
+					},
+					error:function(err){
+						console.log(err)
+					}
+				})
+				$('.modal-backdrop').hide()
+				$('#myModal').hide()
+			})
+			
+
+		})
+		$('table').on('click','.edit',function(){
+			var id=$(this).parents('tr').children('td').eq(0).attr('id');
+			window.location.href=`http://localhost:3000/admin/editNews?id=${id}`;
+			
+
+		})
+
+		$('#category').change(function(){
+			var json={
+				category:$('#category option:selected').text()
+			}
+			$.ajax({
+				url:'/admin/selectNews',
+				type:'post',
+				data:json,
+				success:function(data){
+					$('tbody tr').remove();
+					data.forEach(function(ele, index){
+						var s = ele.sign;
+						if(s===0){
+								s='普通';
+							}else if(s===1){
+								s='热点';
+							}else if(s===2){
+								s='轮播'
+						}
+						var id = ele.id;
+						var category = ele.category;
+						var title = ele.title;
+						var img = ele.img;
+						var source = ele.source;
+						// var time = ele.time;
+						var time = moment(`${ele.time}`).format('YYYY-MM-DD HH:mm:ss');
+						var sign = s;
+						$(`<tr><td id=${id}>${id}</td><td class='category'>${category}</td><td class='title'>${title}</td><td class='img'><img src=${img} width='100' /></td><td class='source'>${source}</td><td class='time'>${time}</td><td class='sign'>${sign}</td><td><span class='glyphicon glyphicon-pencil edit'></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class='glyphicon glyphicon-remove delete'  data-toggle="modal" data-target="#myModal"></span></td></tr>`).appendTo('table tbody');
+
+					})
+				},
+				error:function(err){
+					console.log(err)
+				}
+			})
+		})
+
+
+
+
+
+	})
+</script>
+</html>

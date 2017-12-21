@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>百度新闻首页</title>
+    <link rel='stylesheet' href='/stylesheets/reset.css' />
+    <link rel='stylesheet' href='/iconfont/iconfont.css' />
+    <link rel='stylesheet' href='/swiper/dist/css/swiper.min.css' />
+    <link rel='stylesheet' href='/bootstrap/dist/css/bootstrap.min.css' />
+    <link rel='stylesheet' href='/stylesheets/index.css' />
+    <script src="/swiper/dist/js/swiper.min.js"></script>
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="/moment/moment.js"></script>
+    <script src="/javascripts/js.js"></script>
+</head>
+<body>
+	<div class="wrap">
+		<header>
+			<a href="javascript:history.back();" class="goback"><i class="iconfont icon-fanhui"></i></a>
+    	</header>
+    	<div class="user-box">
+    		<form class="form-horizontal">
+			  <div class="form-group">
+			    <label for="inputEmail3" class="col-sm-2 control-label">用户名</label>
+			    <div class="col-sm-10">
+			      <input type="text" class="form-control" id="username" placeholder="用户名" name="username">
+			    </div>
+			  </div>
+			  <div class="form-group">
+			    <label for="inputPassword3" class="col-sm-2 control-label">密码</label>
+			    <div class="col-sm-10">
+			      <input type="password" class="form-control" id="psw" placeholder="密码" name='psw'>
+			    </div>
+			  </div>
+			  <div class="form-group">
+			    <div class="col-sm-offset-2 col-sm-10">
+			      <button type="submit" class="btn btn-primary" id="regBtn">注册</button>
+			      <p class="tMar10">已有账号？<a href="/login">去登录</a></p>
+			    </div>
+			  </div>
+			</form>
+
+    	</div>
+		
+	</div>
+	<script type="text/javascript">
+		$('#regBtn').click(function(e){
+			e.preventDefault();
+			var json = {
+				username:$('#username').val(),
+				password:$('#psw').val()
+			}
+			$.ajax({
+				url:'/register',
+				type:'post',
+				data:json,
+				success:function(data){
+					if(data.state==='noOk'){
+						alert(data.message);
+						$('#username').val('');
+						$('#username').focus();
+						$('#psw').val('');
+					}else{
+						alert(data.message);
+						window.location.href='/login'
+					}
+				},
+				error:function(err){
+
+				}
+			})
+		})
+	</script>
+</body>
+</html>

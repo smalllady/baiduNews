@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>百度新闻首页</title>
+    <link rel='stylesheet' href='/stylesheets/reset.css' />
+    <link rel='stylesheet' href='/iconfont/iconfont.css' />
+    <link rel='stylesheet' href='/swiper/dist/css/swiper.min.css' />
+    <link rel='stylesheet' href='/stylesheets/index.css' />
+    <script src="/swiper/dist/js/swiper.min.js"></script>
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="/moment/moment.js"></script>
+    <script src="/javascripts/js.js"></script>
+  </head>
+  <body>
+    <div class="wrap">
+    	<header>
+    		<ul>
+    			<li><a href="#"><i class="iconfont icon-baidu"></i></a></li>
+    			<li><a href="#"><i class="iconfont icon-user2"></i></a></li>
+    		</ul>
+    		<ul class="rInfo">
+    			<%if(typeof user !=='undefined' && user){ %>
+    				<li class="login"><%= user.username%></li>
+    				<li class="login"><a href="/signOut">退出</a></li>
+    			<%}else{ %>
+					<li class="login"><a href="/login">login</a></li>
+					
+    			<%} %>
+
+    		</ul>
+    	</header>
+    	<nav>
+    		<div class="nav-list">
+    			<span class="lbg"></span>
+    				<div class="list-info">
+    					<ul>
+		    			</ul>
+    				</div>
+    			<span class="rbg"></span>
+    			<span id='all'><i class="iconfont icon-xiala"></i></span>
+    		</div>
+    		<div class="all-list">
+    			<h2>切换栏目<i class="iconfont icon-shousuo" id="close"></i></h2>
+    			<dl>
+    				<dd></dd>
+    			</dl>
+    			<p>删除及排序</p>
+
+    		</div>
+    		<div class="mark"></div>
+    	</nav>
+    	<div class="swiper-container">
+            <ul class="swiper-wrapper">
+            </ul>
+            <div class="swiper-pagination"></div>
+        </div>
+        <div class="news-list">
+        	<ul>
+        	</ul>
+        </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+  	$(function(){
+  		$('#all').click(function(){
+  			$('.all-list').show();
+  			$('.mark').show();
+  			$('#close').click(function(){
+  			$('.all-list').hide();
+  			$('.mark').hide();
+  			})
+
+  		})
+		getNav();
+		getDefault();
+		$('.nav0').addClass('cur')
+		$('nav').on('click','a',function(e){
+			e.preventDefault();
+
+			$(this).parent('li').removeClass('cur').addClass('cur').siblings('li').removeClass('cur')
+			
+			var json = {
+				category:$(this).text()
+			}
+			$.ajax({
+				url:'http://192.168.11.49:3000/getNews',
+			    type:'post',
+			    data:json,
+			    success:function(data){
+			    	$('.news-list ul li').remove()
+			    	data.forEach(function(ele,index){
+			    		var time = moment(`${ele.time}`).format('YYYY-MM-DD HH:mm:ss');
+		        		$(`<li><img src=${ele.img}><h2>${ele.title}</h2><p>${ele.source}<em class='r${ele.sign}'>热点</em></p><p>${time}</p>`).appendTo($('.news-list ul'))	
+		        	if(ele.sign===1){
+						$('.r1').show()
+					}    		
+			    })
+			    },
+			    error:function(err){
+			    	console.log(err)
+			    }
+			})
+
+			$.ajax({
+				url:'http://192.168.11.49:3000/getSwiper',
+				type:'post',
+				data:json,
+				success:function(data){
+					$('.swiper-container ul li').remove()
+					data.forEach(function(ele,index){	
+			            $(`<li class="swiper-slide">
+		                	<a href="#" target="_blank">
+		                	<img src=${ele.img}>
+		                	<p><span>${ele.title}</span></p>
+			                </a>
+			            </li>`).appendTo($('.swiper-container ul'))
+			    	})
+			    	showSlide();
+				},
+				error:function(err){
+					console.log(err)
+				}
+			})
+
+		})
+
+
+		
+  	})
+  	function showSlide(){
+        var mySwiper = new Swiper ('.swiper-container', {
+        	autoplay:true,
+            loop: true,
+            pagination: {
+              el: '.swiper-pagination',
+              dynamicBullets:true
+            },
+            
+          })        
+	}
+
+	function getNav(){
+		var arry = ['推荐','百家','本地','娱乐','社会','军事','女人','搞笑','互联网','科技']
+		for(var i =0; i<arry.length;i++){
+			$(`<li class='nav${i}'><a href='#'>${arry[i]}</a></li>`).appendTo($('.list-info ul'));
+			$(`<a href="#">${arry[i]}</a>`).appendTo($('.all-list dl dd'));
+		}
+	}
+
+	function getDefault(){
+		$.ajax({
+				url:'http://192.168.11.49:3000/getSwiperD',
+				type:'get',
+				success:function(data){
+					$('.swiper-container ul li').remove();
+					$('.news-list ul li').remove();
+					data.forEach(function(ele,index){	
+						
+			            $(`<li class="swiper-slide">
+		                	<a href="#" target="_blank">
+		                	<img src=${ele.img}>
+		                	<p><span>${ele.title}</span></p>
+			                </a>
+			            </li>`).appendTo($('.swiper-container ul'));   		
+				    	});
+					showSlide();
+				},
+				error:function(err){
+					console.log(err)
+				}
+			})
+		$.ajax({
+			url:'http://192.168.11.49:3000/getNewsD',
+			type:'get',
+			success:function(data){
+				$('.news-list ul li').remove();
+				data.forEach(function(ele,index){
+					var time = moment(`${ele.time}`).format('YYYY-MM-DD HH:mm:ss');
+		        	$(`<li><img src=${ele.img}><h2>${ele.title}</h2><p>${ele.source}<em class='r${ele.sign}'>热点</em></p><p>${time}</p>`).appendTo($('.news-list ul'))
+		        	if(ele.sign===1){
+						$('.r1').show()
+					}	    
+
+			    })
+				
+			},
+			error:function(err){
+				console.log(err)
+			}
+		})
+		
+		
+	}
+
+  </script>
+</html>
